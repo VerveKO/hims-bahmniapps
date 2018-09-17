@@ -20,7 +20,9 @@ angular.module('bahmni.registration')
                     return $1.toUpperCase().replace(/[-_]/, '');
                 });
                 _.each($scope.addressLevels, function (addressLevel) {
-                    if (addressLevel.addressField === columnCamelCase) { columnName = addressLevel.name; }
+                    if (addressLevel.addressField === columnCamelCase) {
+                        columnName = addressLevel.name;
+                    }
                 });
                 return columnName;
             };
@@ -364,7 +366,7 @@ angular.module('bahmni.registration')
             };
 
             $scope.doExtensionAction = function (extension) {
-                var forwardTo = appService.getAppDescriptor().formatUrl(extension.url, { 'patientUuid': $scope.selectedPatient.uuid });
+                var forwardTo = appService.getAppDescriptor().formatUrl(extension.url, {'patientUuid': $scope.selectedPatient.uuid});
                 if (extension.label === 'Print') {
                     var params = identifyParams(forwardTo);
                     if (params.launch === 'dialog') {
@@ -387,5 +389,25 @@ angular.module('bahmni.registration')
 
             $scope.isExtraIdentifierConfigured = function () {
                 return !_.isEmpty($scope.extraIdentifierTypes);
+            };
+
+            $scope.processRegistrationFee = function (patient) {
+                var erpCredentials = {
+                    "usr": "openmrs@intelligentso.com",
+                    "pwd": "openmrs"
+                };
+                patient.products = ["registration fee"];
+                console.log("patient to process registration fee for +++++++++++++++++++++++++++++++" + JSON.stringify(patient));
+                patientService.loginERP(erpCredentials).then(function (res) {
+                    patientService.billRegistrationFee(patient).then(function (response) {
+                        console.log("response for billing registration fee ++++++++" + JSON.stringify(response));
+                    },
+                            function (error) {
+                                console.log("error for billing registration +++++++++++++++++++++" + JSON.stringify(error));
+                            });
+                },
+                    function (error) {
+                        console.log("error calling erp login++++++++++++++++++" + JSON.stringify(error));
+                    });
             };
         }]);
