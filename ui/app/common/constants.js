@@ -4,7 +4,7 @@ var Bahmni = Bahmni || {};
 Bahmni.Common = Bahmni.Common || {};
 
 (function () {
-    var hostUrl = localStorage.getItem('host') ? ("https://" + localStorage.getItem('host')) : "";
+    var hostUrl = "http://104.248.79.159:8080";
     var rootDir = localStorage.getItem('rootDir') || "";
     var RESTWS = hostUrl + "/openmrs/ws/rest";
     var RESTWS_V1 = hostUrl + "/openmrs/ws/rest/v1";
@@ -12,7 +12,7 @@ Bahmni.Common = Bahmni.Common || {};
     var EMRAPI = RESTWS + "/emrapi";
     var BACTERIOLOGY = RESTWS_V1;
     var BASE_URL = hostUrl + "/bahmni_config/openmrs/apps/";
-    var CUSTOM_URL = hostUrl + "/implementation_config/openmrs/apps/";
+    var CUSTOM_URL = hostUrl + "/bahmni_config/openmrs/apps/";
 
     var serverErrorMessages = [
         {
@@ -255,4 +255,3 @@ Bahmni.Common = Bahmni.Common || {};
         defaultPossibleRelativeSearchLimit: 10
     };
 })();
-

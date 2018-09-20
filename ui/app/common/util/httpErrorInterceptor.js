@@ -58,7 +58,7 @@ angular.module('httpErrorInterceptor', [])
                         showError(errorMessage);
                     }
                 } else if (response.status === 404) {
-                    if (!_.includes(response.config.url, "implementation_config") && !_.includes(response.config.url, "locale_")
+                    if (!_.includes(response.config.url, "bahmni_config") && !_.includes(response.config.url, "locale_")
                         && !_.includes(response.config.url, "offlineMetadata")) {
                         showError("The requested information does not exist");
                     }
