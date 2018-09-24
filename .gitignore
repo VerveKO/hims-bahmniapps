@@ -29,3 +29,4 @@ node_modules
 **/.idea/*
 ui/common.background.min.js
 *.zip
+ui/app/common/constants.js
