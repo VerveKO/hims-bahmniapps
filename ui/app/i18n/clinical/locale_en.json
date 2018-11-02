@@ -326,5 +326,8 @@
     "EDIT_LABEL": "Edit",
     "INVESTIGATIONS_PANELS_HEADER_LABEL": "Panels",
     "INVESTIGATIONS_SELECTIONS_HEADER_LABEL": "Selection",
-    "CLINICAL_GO_TO_DASHBOARD_LABEL": "Go to IPD dashboard"
+    "CLINICAL_GO_TO_DASHBOARD_LABEL": "Go to IPD dashboard",
+
+    "CLINICAL_PRESCRIPTIONS_KEY" : "Prescriptions",
+    "CLINICAL_CASE_SUMARY_KEY" : "Case Summary"
 }
