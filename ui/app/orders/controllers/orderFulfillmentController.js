@@ -78,6 +78,13 @@ angular.module('bahmni.orders').controller('OrderFulfillmentController', ['$scop
             return $translate.instant('NO_ORDERS_PRESENT', {orderType: $scope.orderType});
         };
 
+        $scope.bill = function () {
+            console.log("clicked");
+            if (validationSuccess()) {
+                //Send invoice to server
+            }
+            return $q.when({});
+        };
         $scope.$on("event:saveOrderObservations", function () {
             if (!$scope.isFormValid()) {
                 $scope.$parent.$broadcast("event:errorsOnForm");
