@@ -27,6 +27,12 @@ angular.module('bahmni.common.patient')
             });
         };
 
+        this.getRadiologyPayment = function (identifier) {
+            var params = {};
+            params.patient_id = identifier;
+            return $http.post(Bahmni.Common.Constants.radiology_middleware, params, {withCredentials: true});
+        };
+
         this.search = function (query, offset, identifier) {
             offset = offset || 0;
             return $http.get(Bahmni.Common.Constants.bahmniSearchUrl + "/patient", {

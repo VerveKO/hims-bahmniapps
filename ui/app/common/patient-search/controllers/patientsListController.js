@@ -8,6 +8,7 @@ angular.module('bahmni.common.patientSearch')
             var searchTypes = appService.getAppDescriptor().getExtensions("org.bahmni.patient.search", "config").map(mapExtensionToSearchType);
             $scope.search = new Bahmni.Common.PatientSearch.Search(_.without(searchTypes, undefined));
             $scope.search.markPatientEntry();
+            console.log("search", $scope.search);
             $scope.$watch('search.searchType', function (currentSearchType) {
                 _.isEmpty(currentSearchType) || fetchPatients(currentSearchType);
             });
@@ -24,10 +25,20 @@ angular.module('bahmni.common.patientSearch')
 
         $scope.searchPatients = function () {
             return spinner.forPromise(patientService.search($scope.search.searchParameter)).then(function (response) {
+                console.log("response", response);
                 $scope.search.updateSearchResults(response.data.pageOfResults);
                 if ($scope.search.hasSingleActivePatient()) {
                     $scope.forwardPatient($scope.search.activePatients[0]);
                 }
+            });
+        };
+
+        var fetchPaymentStatus = function () {
+            angular.forEach($scope.search.searchResults, function (value, key) {
+                patientService.getRadiologyPayment(value.identifier).then(function (response) {
+                    console.log("payment", response);
+                    $scope.search.searchResults.paid = true;
+                });
             });
         };
 
@@ -49,6 +60,8 @@ angular.module('bahmni.common.patientSearch')
                     if ($scope.search.isSelectedSearch(searchType)) {
                         $scope.search.updatePatientList(response.data);
                     }
+                    fetchPaymentStatus();
+
                 });
             }
         };
