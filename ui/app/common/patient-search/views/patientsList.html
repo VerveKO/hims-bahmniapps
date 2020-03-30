@@ -78,7 +78,7 @@
                     <thead>
                     <tr>
                         <!-- <th><strong>Sl.No</strong></th> -->
-                        <th ng-repeat="heading in getHeadings(search.visiblePatients)"><strong>{{ ::heading | translate }}</strong></th>
+                        <th ng-repeat="heading in getHeadings(search.visiblePatients)" ng-if="heading !== 'paymentStatus'"><strong>{{ ::heading | translate }}</strong></th>
                         <th>Payment Status</th>
                     </tr>
                     </thead>
@@ -87,18 +87,14 @@
                         <!-- <td>
                             {{$index + 1}}
                         </td> -->
-                        <td ng-repeat="heading in getHeadings(search.visiblePatients)">
+                        <td ng-repeat="heading in getHeadings(search.visiblePatients)" ng-if="heading !== 'paymentStatus'">
                             <a ng-if="::isHeadingOfLinkColumn(heading)"
                                ng-click="forwardPatient(row, heading)">{{::row[heading]}}</a>
                             <span ng-if="::isHeadingOfName(heading)" ng-click="forwardPatient(row)">{{::row[heading]}}
                                 <i class="ipd-indication fa fa-bed" ng-if="::(row.hasBeenAdmitted===true||row.hasBeenAdmitted==='true')"></i>
                             </span>
-                            <span ng-if="::(!isHeadingOfLinkColumn(heading) && !isHeadingOfName(heading))">
-                            {{::row[heading]}}
-                            </span>
                         </td>
-                        <td ng-if="::row.paid">Paid</td>
-                        <td ng-if="::row.paid == undefined">Unknown</td>
+                        <td>{{::row.paymentStatus}}</td>
                     </tr>
                     </tbody>
                 </table>
