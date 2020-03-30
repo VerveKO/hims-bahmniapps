@@ -2,13 +2,12 @@
 
 angular.module('bahmni.common.patientSearch')
 .controller('PatientsListController', ['$scope', '$window', 'patientService', '$rootScope', 'appService', 'spinner',
-    '$stateParams', '$bahmniCookieStore', 'printer', 'configurationService',
-    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, printer, configurationService) {
+    '$stateParams', '$bahmniCookieStore', 'printer', 'messagingService', 'configurationService',
+    function ($scope, $window, patientService, $rootScope, appService, spinner, $stateParams, $bahmniCookieStore, printer, messagingService, configurationService) {
         var initialize = function () {
             var searchTypes = appService.getAppDescriptor().getExtensions("org.bahmni.patient.search", "config").map(mapExtensionToSearchType);
             $scope.search = new Bahmni.Common.PatientSearch.Search(_.without(searchTypes, undefined));
             $scope.search.markPatientEntry();
-            console.log("search", $scope.search);
             $scope.$watch('search.searchType', function (currentSearchType) {
                 _.isEmpty(currentSearchType) || fetchPatients(currentSearchType);
             });
@@ -25,7 +24,6 @@ angular.module('bahmni.common.patientSearch')
 
         $scope.searchPatients = function () {
             return spinner.forPromise(patientService.search($scope.search.searchParameter)).then(function (response) {
-                console.log("response", response);
                 $scope.search.updateSearchResults(response.data.pageOfResults);
                 if ($scope.search.hasSingleActivePatient()) {
                     $scope.forwardPatient($scope.search.activePatients[0]);
@@ -34,12 +32,14 @@ angular.module('bahmni.common.patientSearch')
         };
 
         var fetchPaymentStatus = function () {
-            angular.forEach($scope.search.searchResults, function (value, key) {
-                patientService.getRadiologyPayment(value.identifier).then(function (response) {
-                    console.log("payment", response);
-                    $scope.search.searchResults.paid = true;
+            if($scope.search.searchType && $scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType) {
+                angular.forEach($scope.search.searchResults, function (value, key) {
+                    patientService.getRadiologyPayment(value.identifier).then(function (response) {
+                        const status = (response.data.status ? "Paid" : "Unpaid") || "Unknown";
+                        $scope.search.searchResults[key].paymentStatus = status;
+                    });
                 });
-            });
+            }
         };
 
         $scope.filterPatientsAndSubmit = function () {
@@ -134,6 +134,10 @@ angular.module('bahmni.common.patientSearch')
         };
 
         $scope.forwardPatient = function (patient, heading) {
+            if($scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType) {
+                messagingService.showMessage("error", "Order is not paid for. Please advise " + patient.name + " to pay first.");
+                return;
+            }
             var options = $.extend({}, $stateParams);
             $rootScope.patientAdmitLocationStatus = patient.Status;
             $.extend(options, {
