@@ -89,7 +89,7 @@
                         </td> -->
                         <td ng-repeat="heading in getHeadings(search.visiblePatients)" ng-if="heading !== 'paymentStatus'">
                             <a ng-if="::isHeadingOfLinkColumn(heading)"
-                               ng-click="forwardPatient(row, heading)">{{::row[heading]}}</a>
+                               ng-click="forwardRadiologyPatient(row, heading, row.paymentStatus)">{{::row[heading]}}</a>
                             <span ng-if="::isHeadingOfName(heading)" ng-click="forwardPatient(row)">{{::row[heading]}}
                                 <i class="ipd-indication fa fa-bed" ng-if="::(row.hasBeenAdmitted===true||row.hasBeenAdmitted==='true')"></i>
                             </span>
