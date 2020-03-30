@@ -254,8 +254,8 @@ Bahmni.Common = Bahmni.Common || {};
         localeLangs: "/bahmni_config/openmrs/apps/home/locale_languages.json",
         privilegeRequiredErrorMessage: "PRIVILEGE_REQUIRED",
         defaultPossibleRelativeSearchLimit: 10,
-        radiology_middleware : MIDDLEWARE + "/middlewareapi/test/query_radiologystatus/",
-        radiologyOrderSerachType : "Radiology Order"
+        radiology_middleware: MIDDLEWARE + "/middlewareapi/test/query_radiologystatus/",
+        radiologyOrderSerachType: "Radiology Order"
     };
 })();
 

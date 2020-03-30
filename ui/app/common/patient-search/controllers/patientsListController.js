@@ -32,7 +32,7 @@ angular.module('bahmni.common.patientSearch')
         };
 
         var fetchPaymentStatus = function () {
-            if($scope.search.searchType && $scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType) {
+            if ($scope.search.searchType && $scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType) {
                 angular.forEach($scope.search.searchResults, function (value, key) {
                     patientService.getRadiologyPayment(value.identifier).then(function (response) {
                         const status = (response.data.status ? "Paid" : "Unpaid") || "Unknown";
@@ -61,7 +61,6 @@ angular.module('bahmni.common.patientSearch')
                         $scope.search.updatePatientList(response.data);
                     }
                     fetchPaymentStatus();
-
                 });
             }
         };
@@ -134,7 +133,7 @@ angular.module('bahmni.common.patientSearch')
         };
 
         $scope.forwardPatient = function (patient, heading) {
-            if($scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType) {
+            if ($scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType) {
                 messagingService.showMessage("error", "Order is not paid for. Please advise " + patient.name + " to pay first.");
                 return;
             }
