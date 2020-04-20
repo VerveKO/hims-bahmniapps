@@ -149,8 +149,10 @@ angular.module('bahmni.common.uiHelper')
             require: 'ngModel',
             link: function (scope, element, attrs, modelCtrl) {
                 var capitalize = function (inputValue) {
-                    if (inputValue === undefined) {
+                    if (inputValue === undefined || inputValue === null) {
                         inputValue = '';
+                        console.log("returning");
+                        return;
                     }
                     var capitalized = inputValue.charAt(0).toUpperCase() +
                         inputValue.substring(1);
