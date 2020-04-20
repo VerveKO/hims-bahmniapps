@@ -23,7 +23,14 @@
                             <div class="field-value">
                                 <label class="control-label"><strong>{{::patient.name}}</strong></label>
                             </div>
+                            <div class="field-attribute">
+                                <label class="control-label" for="patientAge">{{ ::'REGISTRATION_LABEL_AGE' | translate}} : </label>
+                            </div>
+                            <div class="field-value">
+                                <label class="control-label"><strong>{{::patient.age.years}} Years {{::patient.age.months}} Months {{::patient.age.days}} Days </strong></label>
+                            </div>
                         </div>
+
                     </section>
                     <!-- TODO: need to find a better way to render the directive again on context change or after all the calls are made.-->
                     <section class="observation-section" ng-if="context">
