@@ -6,13 +6,24 @@ angular.module('bahmni.common.domain')
             var results = response.data.results;
             if (!_.isEmpty(results)) {
                 var bed = _.first(results);
-                return {
-                    'wardName': bed.physicalLocation.parentLocation.display,
-                    'wardUuid': bed.physicalLocation.parentLocation.uuid,
-                    'physicalLocationName': bed.physicalLocation.name,
-                    'bedNumber': bed.bedNumber,
-                    'bedId': bed.bedId
-                };
+                console.log('bed', bed);
+                if (bed.physicalLocation.parentLocation) {
+                    return {
+                        'wardName': bed.physicalLocation.parentLocation.display,
+                        'wardUuid': bed.physicalLocation.parentLocation.uuid,
+                        'physicalLocationName': bed.physicalLocation.name,
+                        'bedNumber': bed.bedNumber,
+                        'bedId': bed.bedId
+                    };
+                } else {
+                    return {
+                        'wardName': bed.physicalLocation.display,
+                        'wardUuid': bed.physicalLocation.uuid,
+                        'physicalLocationName': bed.name,
+                        'bedNumber': bed.bedNumber,
+                        'bedId': bed.bedId
+                    };
+                }
             }
         };
 
