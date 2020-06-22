@@ -6,7 +6,6 @@ angular.module('bahmni.common.domain')
             var results = response.data.results;
             if (!_.isEmpty(results)) {
                 var bed = _.first(results);
-                console.log('bed', bed);
                 if (bed.physicalLocation.parentLocation) {
                     return {
                         'wardName': bed.physicalLocation.parentLocation.display,
