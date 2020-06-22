@@ -9,6 +9,9 @@
                 </select>
             </label>
         </div>
+        <div id="adtType" ng-if="getAdtTypeConfig && dispositionAction">
+            <concept-set concept-set-name="getAdtTypeConfig" observations="adtObservations"></concept-set>
+        </div>
         <div id="adtNotes" ng-if="getAdtConceptConfig && dispositionAction">
             <concept-set concept-set-name="getAdtConceptConfig" observations="adtObservations"></concept-set>
         </div>
@@ -31,6 +34,7 @@
             </div>
         </div>
     </div>
-    <dashboard patient="patient" config="dashboardConfig" section-groups="sectionGroups" active-visit-uuid="visitSummary.uuid" visit-summary="visitSummary"></dashboard>
+    <dashboard patient="patient" config="dashboardConfig" section-groups="sectionGroups"
+               active-visit-uuid="visitSummary.uuid" visit-summary="visitSummary"></dashboard>
 </div>
 
