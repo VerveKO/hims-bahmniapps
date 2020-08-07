@@ -33,6 +33,10 @@ angular.module('bahmni.common.patient')
             return $http.post(Bahmni.Common.Constants.radiology_middleware, params, {withCredentials: true});
         };
 
+        this.admitPatientInErp = function (params) {
+            return $http.post(Bahmni.Common.Constants.admitMiddlewareUrl, params, {withCredentials: true});
+        };
+
         this.search = function (query, offset, identifier) {
             offset = offset || 0;
             return $http.get(Bahmni.Common.Constants.bahmniSearchUrl + "/patient", {

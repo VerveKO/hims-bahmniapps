@@ -255,6 +255,7 @@ Bahmni.Common = Bahmni.Common || {};
         privilegeRequiredErrorMessage: "PRIVILEGE_REQUIRED",
         defaultPossibleRelativeSearchLimit: 10,
         radiology_middleware: MIDDLEWARE + "/middlewareapi/test/query_radiologystatus/",
+        admitMiddlewareUrl: MIDDLEWARE + "/middlewareapi/v1/dev/admit_patient/",
         radiologyOrderSerachType: "Radiology Order",
         peerReviewUrl: RESTWS_V1 +"/review"
     };
