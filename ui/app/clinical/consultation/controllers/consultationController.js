@@ -4,11 +4,11 @@ angular.module('bahmni.clinical').controller('ConsultationController',
     ['$scope', '$rootScope', '$state', '$location', '$translate', 'clinicalAppConfigService', 'diagnosisService', 'urlHelper', 'contextChangeHandler',
         'spinner', 'encounterService', 'messagingService', 'sessionService', 'retrospectiveEntryService', 'patientContext', '$q',
         'patientVisitHistoryService', '$stateParams', '$window', 'visitHistory', 'clinicalDashboardConfig', 'appService',
-        'ngDialog', '$filter', 'configurations', 'visitConfig', 'conditionsService', 'configurationService', 'auditLogService',
+        'ngDialog', '$filter', 'configurations', 'visitConfig', 'conditionsService', 'configurationService', 'auditLogService', 'peerReviewService',
         function ($scope, $rootScope, $state, $location, $translate, clinicalAppConfigService, diagnosisService, urlHelper, contextChangeHandler,
                   spinner, encounterService, messagingService, sessionService, retrospectiveEntryService, patientContext, $q,
                   patientVisitHistoryService, $stateParams, $window, visitHistory, clinicalDashboardConfig, appService,
-                  ngDialog, $filter, configurations, visitConfig, conditionsService, configurationService, auditLogService) {
+                  ngDialog, $filter, configurations, visitConfig, conditionsService, configurationService, auditLogService, peerReviewService) {
             var DateUtil = Bahmni.Common.Util.DateUtil;
             var getPreviousActiveCondition = Bahmni.Common.Domain.Conditions.getPreviousActiveCondition;
             $scope.togglePrintList = false;
@@ -25,6 +25,7 @@ angular.module('bahmni.clinical').controller('ConsultationController',
             $scope.showControlPanel = false;
             $scope.clinicalDashboardConfig = clinicalDashboardConfig;
             $scope.lastvisited = null;
+            $scope.review = {};
 
             $scope.openConsultationInNewTab = function () {
                 $window.open('#' + $scope.consultationBoardLink, '_blank');
@@ -146,7 +147,11 @@ angular.module('bahmni.clinical').controller('ConsultationController',
 
             var initialize = function () {
                 var appExtensions = clinicalAppConfigService.getAllConsultationBoards();
-                $scope.adtNavigationConfig = {forwardUrl: Bahmni.Clinical.Constants.adtForwardUrl, title: $translate.instant("CLINICAL_GO_TO_DASHBOARD_LABEL"), privilege: Bahmni.Clinical.Constants.adtPrivilege };
+                $scope.adtNavigationConfig = {
+                    forwardUrl: Bahmni.Clinical.Constants.adtForwardUrl,
+                    title: $translate.instant("CLINICAL_GO_TO_DASHBOARD_LABEL"),
+                    privilege: Bahmni.Clinical.Constants.adtPrivilege
+                };
                 $scope.availableBoards = $scope.availableBoards.concat(appExtensions);
                 $scope.showSaveConfirmDialogConfig = appService.getAppDescriptor().getConfigValue('showSaveConfirmDialog');
                 var adtNavigationConfig = appService.getAppDescriptor().getConfigValue('adtNavigationConfig');
@@ -177,7 +182,10 @@ angular.module('bahmni.clinical').controller('ConsultationController',
             });
 
             $scope.adtNavigationURL = function (visitUuid) {
-                return appService.getAppDescriptor().formatUrl($scope.adtNavigationConfig.forwardUrl, {'patientUuid': $scope.patient.uuid, 'visitUuid': visitUuid});
+                return appService.getAppDescriptor().formatUrl($scope.adtNavigationConfig.forwardUrl, {
+                    'patientUuid': $scope.patient.uuid,
+                    'visitUuid': visitUuid
+                });
             };
 
             var cleanUpListenerErrorsOnForm = $scope.$on("event:errorsOnForm", function () {
@@ -345,6 +353,33 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                     });
             };
 
+            var saveRequestReview = function () {
+                if($scope.review && $scope.review.length > 0) {
+                    $scope.review.providerUuid = $scope.review.providerUuid || $scope.consultation.providers[0].uuid;
+                    var patientUuid = $scope.review.patient;
+                    if ($scope.review.reviewResponses && $scope.review.reviewResponses.length > 0) {
+
+                        return peerReviewService.saveReviewRequest($scope.review).then(function () {
+                            return peerReviewService.getPatientReviewRequests(patientUuid);
+                        }).then(function (savedReviewRequests) {
+                            return savedReviewRequests;
+                        });
+                    }
+                }
+            };
+
+            var updateReviewResponse = function () {
+                if ($scope.updatedResponses !== undefined) {
+                    angular.forEach($scope.updatedResponses, function (response, key) {
+                        var params = {
+                            "uuid": key,
+                            "comment": response.comment
+                        };
+                        peerReviewService.updateReviewResponse(params);
+                    });
+                }
+            };
+
             var storeTemplatePreference = function (selectedObsTemplate) {
                 var templates = [];
                 _.each(selectedObsTemplate, function (template) {
@@ -441,7 +476,9 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                     $scope.$parent.$parent.$broadcast("event:errorsOnForm");
                     return $q.when({});
                 }
-                return spinner.forPromise($q.all([preSavePromise(), encounterService.getEncounterType($state.params.programUuid, sessionService.getLoginLocationUuid())]).then(function (results) {
+                $scope.review = $scope.consultation.review;
+                $scope.updatedResponses = $scope.consultation.reviewedResponses;
+                return spinner.forPromise($q.all([preSavePromise(), encounterService.getEncounterType($state.params.programUuid, sessionService.getLoginLocationUuid(), saveRequestReview(), updateReviewResponse())]).then(function (results) {
                     var encounterData = results[0];
                     encounterData.encounterTypeUuid = results[1].uuid;
                     var params = angular.copy($state.params);
