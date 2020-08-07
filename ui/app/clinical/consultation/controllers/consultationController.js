@@ -354,7 +354,7 @@ angular.module('bahmni.clinical').controller('ConsultationController',
             };
 
             var saveRequestReview = function () {
-                if($scope.review && $scope.review.length > 0) {
+                if($scope.review ) {
                     $scope.review.providerUuid = $scope.review.providerUuid || $scope.consultation.providers[0].uuid;
                     var patientUuid = $scope.review.patient;
                     if ($scope.review.reviewResponses && $scope.review.reviewResponses.length > 0) {
