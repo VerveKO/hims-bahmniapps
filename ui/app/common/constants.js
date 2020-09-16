@@ -13,7 +13,7 @@ Bahmni.Common = Bahmni.Common || {};
     var BACTERIOLOGY = RESTWS_V1;
     var BASE_URL = hostUrl + "/bahmni_config/openmrs/apps/";
     var CUSTOM_URL = hostUrl + "/implementation_config/openmrs/apps/";
-    var MIDDLEWARE = "https://middleware.ieshealth.net:8443/";
+    var MIDDLEWARE = "https://middleware.ieshealth.net:9443";
 
     var serverErrorMessages = [
         {
@@ -255,7 +255,7 @@ Bahmni.Common = Bahmni.Common || {};
         privilegeRequiredErrorMessage: "PRIVILEGE_REQUIRED",
         defaultPossibleRelativeSearchLimit: 10,
         radiology_middleware: MIDDLEWARE + "/middlewareapi/test/query_radiologystatus/",
-        admitMiddlewareUrl: MIDDLEWARE + "/middlewareapi/v1/dev/admit_patient/",
+        admitMiddlewareUrl: MIDDLEWARE + "/middlewareapi/v1/test/admit_patient",
         radiologyOrderSerachType: "Radiology Order",
         peerReviewUrl: RESTWS_V1 +"/review"
     };
