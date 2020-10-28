@@ -31,13 +31,11 @@ angular.module('bahmni.clinical')
                         if (reviewResponse.comment === undefined) {
                             $scope.consultation.reviewedResponses[response.uuid].comment = response.comments;
                         }
-                    }else {
-                        $scope.consultation.reviewedResponses[response.uuid] = {"comment" : response.comments};
+                    } else {
+                        $scope.consultation.reviewedResponses[response.uuid] = {"comment": response.comments};
                     }
                 });
             });
-
-
         };
 
         $scope.checkReview = function () {
@@ -53,7 +51,6 @@ angular.module('bahmni.clinical')
                 };
                 return response;
             });
-
         };
 
         $scope.selectProvider = function (providerInfo) {
@@ -62,7 +59,7 @@ angular.module('bahmni.clinical')
                     uuid: providerInfo.uuid
                 }
             };
-            //$scope.review.providerUuid = providerInfo.uuid
+            // $scope.review.providerUuid = providerInfo.uuid
             $scope.review.reviewResponses.push(providerRequest);
             $scope.consultation.review = $scope.review;
         };

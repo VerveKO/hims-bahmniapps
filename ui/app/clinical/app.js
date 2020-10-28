@@ -30,162 +30,162 @@ angular.module('consultation')
             };
             var homeBackLink = {label: "", url: "../home/index.html", accessKey: "h", icon: "fa-home"};
 
-        // @if DEBUG='production'
+            // @if DEBUG='production'
             $compileProvider.debugInfoEnabled(false);
-        // @endif
+            // @endif
 
-        // @if DEBUG='development'
+            // @if DEBUG='development'
             $compileProvider.debugInfoEnabled(true);
-        // @endif
+            // @endif
 
             $stateProvider
-            .state('search', {
-                abstract: true,
-                views: {
-                    'content': {
-                        template: '<div ui-view="patientSearchPage-header"></div> <div ui-view="patientSearchPage-content"></div>'
-                    }
-                },
-                data: {
-                    backLinks: [homeBackLink]
-                },
-                resolve: {
-                    retrospectiveIntialization: function (retrospectiveEntryService) {
-                        return retrospectiveEntryService.initializeRetrospectiveEntry();
-                    }
-                }
-            })
-            .state('search.patientsearch', {
-                url: '/:configName/patient/search',
-                views: {
-                    'patientSearchPage-header': {
-                        templateUrl: '../common/ui-helper/header.html',
-                        controller: 'PatientListHeaderController'
+                .state('search', {
+                    abstract: true,
+                    views: {
+                        'content': {
+                            template: '<div ui-view="patientSearchPage-header"></div> <div ui-view="patientSearchPage-content"></div>'
+                        }
                     },
-                    'patientSearchPage-content': {
-                        templateUrl: '../common/patient-search/views/patientsList.html',
-                        controller: 'PatientsListController'
-                    }
-                },
-                resolve: {
-                    initializeConfigs: function (initialization, $stateParams) {
-                        $stateParams.configName = $stateParams.configName || Bahmni.Clinical.Constants.defaultExtensionName;
-                        patientSearchBackLink.state = 'search.patientsearch({configName: \"' + $stateParams.configName + '\"})';
-                        return initialization($stateParams.configName);
-                    }
-                }
-            })
-            .state('patient', {
-                url: '/:configName/patient/:patientUuid?encounterUuid,programUuid,enrollment',
-                abstract: true,
-                data: {
-                    backLinks: [patientSearchBackLink]
-                },
-                views: {
-                    'content': {
-                        template: '<div ui-view="content"></div>',
-                        controller: function ($scope, patientContext) {
-                            $scope.patient = patientContext.patient;
+                    data: {
+                        backLinks: [homeBackLink]
+                    },
+                    resolve: {
+                        retrospectiveIntialization: function (retrospectiveEntryService) {
+                            return retrospectiveEntryService.initializeRetrospectiveEntry();
                         }
                     }
-                },
-                resolve: {
-                    initialization: function (initialization, $stateParams) {
-                        $stateParams.configName = $stateParams.configName || Bahmni.Clinical.Constants.defaultExtensionName;
-                        patientSearchBackLink.state = 'search.patientsearch({configName: \"' + $stateParams.configName + '\"})';
-                        return initialization($stateParams.configName);
+                })
+                .state('search.patientsearch', {
+                    url: '/:configName/patient/search',
+                    views: {
+                        'patientSearchPage-header': {
+                            templateUrl: '../common/ui-helper/header.html',
+                            controller: 'PatientListHeaderController'
+                        },
+                        'patientSearchPage-content': {
+                            templateUrl: '../common/patient-search/views/patientsList.html',
+                            controller: 'PatientsListController'
+                        }
                     },
-                    patientContext: function (initialization, patientInitialization, $stateParams) {
-                        return patientInitialization($stateParams.patientUuid);
-                    }
-                }
-            })
-            .state('patient.dashboard', {
-                abstract: true,
-                views: {
-                    'content': {
-                        template: '<div ui-view="dashboard-header"></div> <div ui-view="dashboard-content"></div>' +
-                        '<patient-control-panel patient="patient" visit-history="visitHistory" visit="visit" show="showControlPanel" consultation="consultation"/>',
-                        controller: function ($scope, visitHistory, consultationContext, followUpConditionConcept) {
-                            $scope.visitHistory = visitHistory;
-                            $scope.consultation = consultationContext;
-                            $scope.followUpConditionConcept = followUpConditionConcept;
-                            $scope.lastConsultationTabUrl = {url: undefined};
+                    resolve: {
+                        initializeConfigs: function (initialization, $stateParams) {
+                            $stateParams.configName = $stateParams.configName || Bahmni.Clinical.Constants.defaultExtensionName;
+                            patientSearchBackLink.state = 'search.patientsearch({configName: \"' + $stateParams.configName + '\"})';
+                            return initialization($stateParams.configName);
                         }
                     }
-                },
-                resolve: {
-                    visitHistory: function (visitHistoryInitialization, $stateParams, $rootScope) {
-                        return visitHistoryInitialization($stateParams.patientUuid, $rootScope.visitLocation);
+                })
+                .state('patient', {
+                    url: '/:configName/patient/:patientUuid?encounterUuid,programUuid,enrollment',
+                    abstract: true,
+                    data: {
+                        backLinks: [patientSearchBackLink]
                     },
-                    retrospectiveIntialization: function (retrospectiveEntryService) {
-                        return retrospectiveEntryService.initializeRetrospectiveEntry();
+                    views: {
+                        'content': {
+                            template: '<div ui-view="content"></div>',
+                            controller: function ($scope, patientContext) {
+                                $scope.patient = patientContext.patient;
+                            }
+                        }
                     },
-                    followUpConditionConcept: function (conditionsService) {
-                        return conditionsService.getFollowUpConditionConcept().then(function (response) {
-                            return response.data.results[0];
-                        });
-                    },
-                    consultationContext: function (consultationInitialization, initialization, $stateParams, followUpConditionConcept) {
-                        return consultationInitialization(
-                            $stateParams.patientUuid, $stateParams.encounterUuid, $stateParams.programUuid, $stateParams.enrollment, followUpConditionConcept);
-                    },
-                    dashboardInitialization: function ($rootScope, initialization, patientContext, clinicalDashboardConfig, userService) {
-                        return clinicalDashboardConfig.load().then(function () {
-                            $rootScope.currentUser.addToRecentlyViewed(patientContext.patient, clinicalDashboardConfig.getMaxRecentlyViewedPatients());
-                            return userService.savePreferences();
-                        });
-                    },
-                    visitSummary: function (visitSummaryInitialization, initialization, visitHistory) {
-                        return visitHistory.activeVisit ? visitSummaryInitialization(visitHistory.activeVisit.uuid) : null;
-                    },
-                    visitConfig: function (initialization, visitTabConfig) {
-                        return visitTabConfig.load();
+                    resolve: {
+                        initialization: function (initialization, $stateParams) {
+                            $stateParams.configName = $stateParams.configName || Bahmni.Clinical.Constants.defaultExtensionName;
+                            patientSearchBackLink.state = 'search.patientsearch({configName: \"' + $stateParams.configName + '\"})';
+                            return initialization($stateParams.configName);
+                        },
+                        patientContext: function (initialization, patientInitialization, $stateParams) {
+                            return patientInitialization($stateParams.patientUuid);
+                        }
                     }
-                }
-            })
-            .state('patient.dashboard.show', {
-                url: '/dashboard?dateEnrolled,dateCompleted',
-                params: {
-                    dashboardCachebuster: null
-                },
-                views: {
-                    'dashboard-header': {
-                        templateUrl: 'dashboard/views/clinicalDashboardHeader.html',
-                        controller: 'ConsultationController'
+                })
+                .state('patient.dashboard', {
+                    abstract: true,
+                    views: {
+                        'content': {
+                            template: '<div ui-view="dashboard-header"></div> <div ui-view="dashboard-content"></div>' +
+                            '<patient-control-panel patient="patient" visit-history="visitHistory" visit="visit" show="showControlPanel" consultation="consultation"/>',
+                            controller: function ($scope, visitHistory, consultationContext, followUpConditionConcept) {
+                                $scope.visitHistory = visitHistory;
+                                $scope.consultation = consultationContext;
+                                $scope.followUpConditionConcept = followUpConditionConcept;
+                                $scope.lastConsultationTabUrl = {url: undefined};
+                            }
+                        }
                     },
-                    'dashboard-content': {
-                        templateUrl: 'dashboard/views/dashboard.html',
-                        controller: 'PatientDashboardController'
+                    resolve: {
+                        visitHistory: function (visitHistoryInitialization, $stateParams, $rootScope) {
+                            return visitHistoryInitialization($stateParams.patientUuid, $rootScope.visitLocation);
+                        },
+                        retrospectiveIntialization: function (retrospectiveEntryService) {
+                            return retrospectiveEntryService.initializeRetrospectiveEntry();
+                        },
+                        followUpConditionConcept: function (conditionsService) {
+                            return conditionsService.getFollowUpConditionConcept().then(function (response) {
+                                return response.data.results[0];
+                            });
+                        },
+                        consultationContext: function (consultationInitialization, initialization, $stateParams, followUpConditionConcept) {
+                            return consultationInitialization(
+                                $stateParams.patientUuid, $stateParams.encounterUuid, $stateParams.programUuid, $stateParams.enrollment, followUpConditionConcept);
+                        },
+                        dashboardInitialization: function ($rootScope, initialization, patientContext, clinicalDashboardConfig, userService) {
+                            return clinicalDashboardConfig.load().then(function () {
+                                $rootScope.currentUser.addToRecentlyViewed(patientContext.patient, clinicalDashboardConfig.getMaxRecentlyViewedPatients());
+                                return userService.savePreferences();
+                            });
+                        },
+                        visitSummary: function (visitSummaryInitialization, initialization, visitHistory) {
+                            return visitHistory.activeVisit ? visitSummaryInitialization(visitHistory.activeVisit.uuid) : null;
+                        },
+                        visitConfig: function (initialization, visitTabConfig) {
+                            return visitTabConfig.load();
+                        }
                     }
-                }
-            })
-            .state('patient.dashboard.show.observations', {
-                url: '/concept-set-group/:conceptSetGroupName',
-                params: {
-                    cachebuster: null,
-                    lastOpenedTemplate: null
-                },
-                views: {
-                    'consultation-content': {
-                        templateUrl: 'consultation/views/conceptSet.html',
-                        controller: 'ConceptSetPageController'
+                })
+                .state('patient.dashboard.show', {
+                    url: '/dashboard?dateEnrolled,dateCompleted',
+                    params: {
+                        dashboardCachebuster: null
+                    },
+                    views: {
+                        'dashboard-header': {
+                            templateUrl: 'dashboard/views/clinicalDashboardHeader.html',
+                            controller: 'ConsultationController'
+                        },
+                        'dashboard-content': {
+                            templateUrl: 'dashboard/views/dashboard.html',
+                            controller: 'PatientDashboardController'
+                        }
                     }
-                }
-            })
-            .state('patient.dashboard.show.diagnosis', {
-                url: '/diagnosis',
-                params: {
-                    cachebuster: null
-                },
-                views: {
-                    'consultation-content': {
-                        templateUrl: 'consultation/views/diagnosis.html',
-                        controller: 'DiagnosisController'
+                })
+                .state('patient.dashboard.show.observations', {
+                    url: '/concept-set-group/:conceptSetGroupName',
+                    params: {
+                        cachebuster: null,
+                        lastOpenedTemplate: null
+                    },
+                    views: {
+                        'consultation-content': {
+                            templateUrl: 'consultation/views/conceptSet.html',
+                            controller: 'ConceptSetPageController'
+                        }
                     }
-                }
-            })
-            .state('patient.dashboard.show.peerReview', {
+                })
+                .state('patient.dashboard.show.diagnosis', {
+                    url: '/diagnosis',
+                    params: {
+                        cachebuster: null
+                    },
+                    views: {
+                        'consultation-content': {
+                            templateUrl: 'consultation/views/diagnosis.html',
+                            controller: 'DiagnosisController'
+                        }
+                    }
+                })
+                .state('patient.dashboard.show.peerReview', {
                     url: '/peerreview',
                     params: {
                         cachebuster: null
@@ -197,269 +197,269 @@ angular.module('consultation')
                         }
                     }
                 })
-            .state('patient.dashboard.show.treatment', {
-                abstract: true,
-                params: {
-                    tabConfigName: null
-                },
-                resolve: {
-                    treatmentConfig: function (initialization, treatmentConfig, $stateParams) {
-                        return treatmentConfig($stateParams.tabConfigName);
-                    }
-                },
-                views: {
-                    'consultation-content': {
-                        controller: 'TreatmentController',
-                        templateUrl: 'consultation/views/treatment.html'
-                    }
-                }
-            })
-            .state('patient.dashboard.show.treatment.page', {
-                url: "/treatment?tabConfigName",
-                params: {
-                    cachebuster: null
-                },
-                resolve: {
-                    activeDrugOrders: function (treatmentService, $stateParams) {
-                        return treatmentService.getActiveDrugOrders($stateParams.patientUuid, $stateParams.dateEnrolled, $stateParams.dateCompleted);
-                    }
-                },
-                views: {
-                    "addTreatment": {
-                        controller: 'AddTreatmentController',
-                        templateUrl: 'consultation/views/treatmentSections/addTreatment.html',
-                        resolve: {
-                            treatmentConfig: 'treatmentConfig'
+                .state('patient.dashboard.show.treatment', {
+                    abstract: true,
+                    params: {
+                        tabConfigName: null
+                    },
+                    resolve: {
+                        treatmentConfig: function (initialization, treatmentConfig, $stateParams) {
+                            return treatmentConfig($stateParams.tabConfigName);
                         }
                     },
-                    "defaultHistoryView": {
-                        controller: 'DrugOrderHistoryController',
-                        templateUrl: 'consultation/views/treatmentSections/drugOrderHistory.html'
-                    },
-                    "customHistoryView": {
-                        controller: 'CustomDrugOrderHistoryController',
-                        templateUrl: 'consultation/views/treatmentSections/customDrugOrderHistory.html'
-                    }
-                }
-            })
-            .state('patient.dashboard.show.disposition', {
-                url: '/disposition',
-                params: {
-                    cachebuster: null
-                },
-                views: {
-                    'consultation-content': {
-                        templateUrl: 'consultation/views/disposition.html',
-                        controller: 'DispositionController'
-                    }
-                }
-
-            })
-            .state('patient.dashboard.show.summary', {
-                url: '/consultation',
-                params: {
-                    cachebuster: null
-                },
-                views: {
-                    'consultation-content': {
-                        templateUrl: 'consultation/views/consultation.html',
-                        controller: 'ConsultationSummaryController'
-                    }
-                }
-            })
-            .state('patient.dashboard.show.orders', {
-                url: '/orders',
-                params: {
-                    cachebuster: null
-                },
-                views: {
-                    'consultation-content': {
-                        templateUrl: 'consultation/views/orders.html',
-                        controller: 'OrderController'
-                    }
-                },
-                resolve: {
-                    allOrderables: function (ordersTabInitialization) {
-                        return ordersTabInitialization();
-                    }
-                }
-            })
-            .state('patient.dashboard.show.bacteriology', {
-                url: '/bacteriology',
-                params: {
-                    cachebuster: null
-                },
-                views: {
-                    'consultation-content': {
-                        templateUrl: 'consultation/views/bacteriology.html',
-                        controller: 'BacteriologyController'
-                    }
-                },
-                resolve: {
-                    bacteriologyConceptSet: function (bacteriologyTabInitialization) {
-                        return bacteriologyTabInitialization();
-                    }
-                }
-            })
-            .state('patient.dashboard.show.investigation', {
-                url: '/investigation',
-                params: {
-                    cachebuster: null
-                },
-                views: {
-                    'consultation-content': {
-                        templateUrl: 'consultation/views/investigations.html',
-                        controller: 'InvestigationController'
-                    }
-                }
-            })
-            .state('patient.visit', {
-                abstract: true,
-                views: {
-                    'content': {
-                        template: '<div ui-view="visit-content"></div>',
-                        controller: function ($scope, visitHistory) {
-                            $scope.visitHistory = visitHistory;
+                    views: {
+                        'consultation-content': {
+                            controller: 'TreatmentController',
+                            templateUrl: 'consultation/views/treatment.html'
                         }
                     }
-                },
-                resolve: {
-                    visitHistory: function (visitHistoryInitialization, $stateParams) {
-                        return visitHistoryInitialization($stateParams.patientUuid);
-                    }
-                }
-            })
-            .state('patient.visit.summaryprint', {
-                url: '/latest-prescription-print',
-                views: {
-                    'visit-content': {
-                        controller: 'LatestPrescriptionPrintController'
-                    }
-                }
-            })
-            .state('patient.dashboard.visit', {
-                url: '/dashboard/visit/:visitUuid/:tab',
-                data: {
-                    backLinks: [patientSearchBackLink]
-                },
-                views: {
-                    'dashboard-header': {
-                        templateUrl: 'common/views/visitHeader.html',
-                        controller: 'VisitHeaderController'
+                })
+                .state('patient.dashboard.show.treatment.page', {
+                    url: "/treatment?tabConfigName",
+                    params: {
+                        cachebuster: null
                     },
-                    'dashboard-content': {
-                        templateUrl: 'common/views/visit.html',
-                        controller: 'VisitController'
-                    }
-                },
-                resolve: {
-                    visitSummary: function (visitSummaryInitialization, $stateParams) {
-                        return visitSummaryInitialization($stateParams.visitUuid);
-                    }
-                }
-            })
-            .state('patient.dashboard.visitPrint', {
-                url: '/dashboard/visit/:visitUuid/:tab/:print',
-                views: {
-                    'dashboard-content': {
-                        template: '<div>Print is getting ready</div>',
-                        controller: 'VisitController'
+                    resolve: {
+                        activeDrugOrders: function (treatmentService, $stateParams) {
+                            return treatmentService.getActiveDrugOrders($stateParams.patientUuid, $stateParams.dateEnrolled, $stateParams.dateCompleted);
+                        }
                     },
-                    'print-content': {
-                        templateUrl: 'common/views/visit.html'
-                    }
-                },
-                resolve: {
-                    visitSummary: function (visitSummaryInitialization, $stateParams) {
-                        return visitSummaryInitialization($stateParams.visitUuid);
-                    }
-                }
-            })
-            .state('patient.dashboard.observation', {
-                url: '/dashboard/observation/:observationUuid',
-                data: {
-                    backLinks: [homeBackLink]
-                },
-                resolve: {
-                    observation: function (observationsService, $stateParams) {
-                        return observationsService.getRevisedObsByUuid($stateParams.observationUuid).then(function (results) {
-                            return results.data;
-                        });
-                    }
-                },
-                views: {
-                    'dashboard-header': {
-                        templateUrl: '../common/ui-helper/header.html',
-                        controller: 'PatientListHeaderController'
-                    },
-                    'dashboard-content': {
-                        controller: function ($scope, observation, patientContext) {
-                            $scope.observation = observation;
-                            $scope.patient = patientContext.patient;
+                    views: {
+                        "addTreatment": {
+                            controller: 'AddTreatmentController',
+                            templateUrl: 'consultation/views/treatmentSections/addTreatment.html',
+                            resolve: {
+                                treatmentConfig: 'treatmentConfig'
+                            }
                         },
-                        template: '<patient-context patient="patient"></patient-context>' +
-                        '<edit-observation  observation="observation" concept-set-name="{{observation.concept.name}}" concept-display-name="{{observation.conceptNameToDisplay}}"></edit-observation>'
+                        "defaultHistoryView": {
+                            controller: 'DrugOrderHistoryController',
+                            templateUrl: 'consultation/views/treatmentSections/drugOrderHistory.html'
+                        },
+                        "customHistoryView": {
+                            controller: 'CustomDrugOrderHistoryController',
+                            templateUrl: 'consultation/views/treatmentSections/customDrugOrderHistory.html'
+                        }
                     }
-                }
-            })
-            .state('patient.dahsboard.visit.tab', {
-                url: '/:tab',
-                data: {
-                    backLinks: [patientSearchBackLink]
-                },
-                views: {
-                    'additional-header': {
-                        templateUrl: 'common/views/visitHeader.html',
-                        controller: 'VisitHeaderController'
+                })
+                .state('patient.dashboard.show.disposition', {
+                    url: '/disposition',
+                    params: {
+                        cachebuster: null
                     },
-                    'content': {
-                        templateUrl: 'common/views/visit.html',
-                        controller: 'VisitController'
+                    views: {
+                        'consultation-content': {
+                            templateUrl: 'consultation/views/disposition.html',
+                            controller: 'DispositionController'
+                        }
                     }
-                },
-                resolve: {
-                    visitSummary: function (visitSummaryInitialization, $stateParams) {
-                        return visitSummaryInitialization($stateParams.visitUuid, $stateParams.tab);
+
+                })
+                .state('patient.dashboard.show.summary', {
+                    url: '/consultation',
+                    params: {
+                        cachebuster: null
                     },
-                    visitConfig: function (initialization, visitTabConfig) {
-                        return visitTabConfig.load();
+                    views: {
+                        'consultation-content': {
+                            templateUrl: 'consultation/views/consultation.html',
+                            controller: 'ConsultationSummaryController'
+                        }
                     }
-                }
-            })
-            .state('patient.patientProgram', {
-                abstract: true,
-                views: {
-                    'content': {
-                        template: '<div ui-view="patientProgram-header"></div> <div ui-view="patientProgram-content" class="patientProgram-content-container"></div>'
-                    }
-                },
-                resolve: {
-                    retrospectiveIntialization: function (retrospectiveEntryService) {
-                        return retrospectiveEntryService.initializeRetrospectiveEntry();
-                    }
-                }
-            })
-            .state('patient.patientProgram.show', {
-                url: '/consultationContext',
-                data: {
-                    backLinks: [patientSearchBackLink]
-                },
-                views: {
-                    'patientProgram-header': {
-                        templateUrl: '../common/ui-helper/header.html',
-                        controller: 'PatientListHeaderController'
+                })
+                .state('patient.dashboard.show.orders', {
+                    url: '/orders',
+                    params: {
+                        cachebuster: null
                     },
-                    'patientProgram-content': {
-                        templateUrl: 'common/views/consultationContext.html',
-                        controller: 'consultationContextController'
+                    views: {
+                        'consultation-content': {
+                            templateUrl: 'consultation/views/orders.html',
+                            controller: 'OrderController'
+                        }
+                    },
+                    resolve: {
+                        allOrderables: function (ordersTabInitialization) {
+                            return ordersTabInitialization();
+                        }
                     }
-                },
-                resolve: {
-                    visitHistory: function (visitHistoryInitialization, $stateParams) {
-                        return visitHistoryInitialization($stateParams.patientUuid);
+                })
+                .state('patient.dashboard.show.bacteriology', {
+                    url: '/bacteriology',
+                    params: {
+                        cachebuster: null
+                    },
+                    views: {
+                        'consultation-content': {
+                            templateUrl: 'consultation/views/bacteriology.html',
+                            controller: 'BacteriologyController'
+                        }
+                    },
+                    resolve: {
+                        bacteriologyConceptSet: function (bacteriologyTabInitialization) {
+                            return bacteriologyTabInitialization();
+                        }
                     }
-                }
-            });
+                })
+                .state('patient.dashboard.show.investigation', {
+                    url: '/investigation',
+                    params: {
+                        cachebuster: null
+                    },
+                    views: {
+                        'consultation-content': {
+                            templateUrl: 'consultation/views/investigations.html',
+                            controller: 'InvestigationController'
+                        }
+                    }
+                })
+                .state('patient.visit', {
+                    abstract: true,
+                    views: {
+                        'content': {
+                            template: '<div ui-view="visit-content"></div>',
+                            controller: function ($scope, visitHistory) {
+                                $scope.visitHistory = visitHistory;
+                            }
+                        }
+                    },
+                    resolve: {
+                        visitHistory: function (visitHistoryInitialization, $stateParams) {
+                            return visitHistoryInitialization($stateParams.patientUuid);
+                        }
+                    }
+                })
+                .state('patient.visit.summaryprint', {
+                    url: '/latest-prescription-print',
+                    views: {
+                        'visit-content': {
+                            controller: 'LatestPrescriptionPrintController'
+                        }
+                    }
+                })
+                .state('patient.dashboard.visit', {
+                    url: '/dashboard/visit/:visitUuid/:tab',
+                    data: {
+                        backLinks: [patientSearchBackLink]
+                    },
+                    views: {
+                        'dashboard-header': {
+                            templateUrl: 'common/views/visitHeader.html',
+                            controller: 'VisitHeaderController'
+                        },
+                        'dashboard-content': {
+                            templateUrl: 'common/views/visit.html',
+                            controller: 'VisitController'
+                        }
+                    },
+                    resolve: {
+                        visitSummary: function (visitSummaryInitialization, $stateParams) {
+                            return visitSummaryInitialization($stateParams.visitUuid);
+                        }
+                    }
+                })
+                .state('patient.dashboard.visitPrint', {
+                    url: '/dashboard/visit/:visitUuid/:tab/:print',
+                    views: {
+                        'dashboard-content': {
+                            template: '<div>Print is getting ready</div>',
+                            controller: 'VisitController'
+                        },
+                        'print-content': {
+                            templateUrl: 'common/views/visit.html'
+                        }
+                    },
+                    resolve: {
+                        visitSummary: function (visitSummaryInitialization, $stateParams) {
+                            return visitSummaryInitialization($stateParams.visitUuid);
+                        }
+                    }
+                })
+                .state('patient.dashboard.observation', {
+                    url: '/dashboard/observation/:observationUuid',
+                    data: {
+                        backLinks: [homeBackLink]
+                    },
+                    resolve: {
+                        observation: function (observationsService, $stateParams) {
+                            return observationsService.getRevisedObsByUuid($stateParams.observationUuid).then(function (results) {
+                                return results.data;
+                            });
+                        }
+                    },
+                    views: {
+                        'dashboard-header': {
+                            templateUrl: '../common/ui-helper/header.html',
+                            controller: 'PatientListHeaderController'
+                        },
+                        'dashboard-content': {
+                            controller: function ($scope, observation, patientContext) {
+                                $scope.observation = observation;
+                                $scope.patient = patientContext.patient;
+                            },
+                            template: '<patient-context patient="patient"></patient-context>' +
+                            '<edit-observation  observation="observation" concept-set-name="{{observation.concept.name}}" concept-display-name="{{observation.conceptNameToDisplay}}"></edit-observation>'
+                        }
+                    }
+                })
+                .state('patient.dahsboard.visit.tab', {
+                    url: '/:tab',
+                    data: {
+                        backLinks: [patientSearchBackLink]
+                    },
+                    views: {
+                        'additional-header': {
+                            templateUrl: 'common/views/visitHeader.html',
+                            controller: 'VisitHeaderController'
+                        },
+                        'content': {
+                            templateUrl: 'common/views/visit.html',
+                            controller: 'VisitController'
+                        }
+                    },
+                    resolve: {
+                        visitSummary: function (visitSummaryInitialization, $stateParams) {
+                            return visitSummaryInitialization($stateParams.visitUuid, $stateParams.tab);
+                        },
+                        visitConfig: function (initialization, visitTabConfig) {
+                            return visitTabConfig.load();
+                        }
+                    }
+                })
+                .state('patient.patientProgram', {
+                    abstract: true,
+                    views: {
+                        'content': {
+                            template: '<div ui-view="patientProgram-header"></div> <div ui-view="patientProgram-content" class="patientProgram-content-container"></div>'
+                        }
+                    },
+                    resolve: {
+                        retrospectiveIntialization: function (retrospectiveEntryService) {
+                            return retrospectiveEntryService.initializeRetrospectiveEntry();
+                        }
+                    }
+                })
+                .state('patient.patientProgram.show', {
+                    url: '/consultationContext',
+                    data: {
+                        backLinks: [patientSearchBackLink]
+                    },
+                    views: {
+                        'patientProgram-header': {
+                            templateUrl: '../common/ui-helper/header.html',
+                            controller: 'PatientListHeaderController'
+                        },
+                        'patientProgram-content': {
+                            templateUrl: 'common/views/consultationContext.html',
+                            controller: 'consultationContextController'
+                        }
+                    },
+                    resolve: {
+                        visitHistory: function (visitHistoryInitialization, $stateParams) {
+                            return visitHistoryInitialization($stateParams.patientUuid);
+                        }
+                    }
+                });
 
             $httpProvider.defaults.headers.common['Disable-WWW-Authenticate'] = true;
 

@@ -257,7 +257,7 @@ Bahmni.Common = Bahmni.Common || {};
         radiology_middleware: MIDDLEWARE + "/middlewareapi/test/query_radiologystatus/",
         admitMiddlewareUrl: MIDDLEWARE + "/middlewareapi/v1/test/admit_patient",
         radiologyOrderSerachType: "Radiology Order",
-        peerReviewUrl: RESTWS_V1 +"/review"
+        peerReviewUrl: RESTWS_V1 + "/review"
     };
 })();
 

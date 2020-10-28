@@ -24,7 +24,7 @@ angular.module('bahmni.common.displaycontrol.admissiondetails')
         var getAdmissionType = function ($scope) {
             const conceptNames = ["ADT TYPE"];
             spinner.forPromise(observationsService.fetch($scope.patientUuid, conceptNames, "1", undefined, $scope.visitSummary.uuid, undefined).then(function (response) {
-                if (response.data.length >0 && response.data[0].value) {
+                if (response.data.length > 0 && response.data[0].value) {
                     $scope.adtType = response.data[0].value.name;
                 }
             }));
