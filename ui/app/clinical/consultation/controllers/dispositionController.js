@@ -1,9 +1,25 @@
 'use strict';
 
 angular.module('bahmni.clinical')
-    .controller('DispositionController', ['$scope', '$q', 'dispositionService', 'retrospectiveEntryService', 'spinner', function ($scope, $q, dispositionService, retrospectiveEntryService, spinner) {
+    .controller('DispositionController', ['$rootScope', '$scope', '$q', 'dispositionService', 'retrospectiveEntryService', 'visitService', 'spinner', function ($rootScope, $scope, $q, dispositionService, retrospectiveEntryService, visitService, spinner) {
         var consultation = $scope.consultation;
         var allDispositions = [];
+        
+        $scope.referClinicDisposition = "REFER_SPECIAL_CLINIC (Refer to special clinic)";
+
+        var getVisitTypes = function () {
+            return visitService.getVisitType().then(function (response) {
+                console.log("response", response);
+                $scope.visitTypes = response.data.results;
+                console.log("Visist types", $scope.visitTypes);
+
+            });
+        };
+
+        var getVisitTypeUuid = function (visitTypeName) {
+                var visitType = _.find($scope.visitTypes, {name: visitTypeName});
+                return visitType && visitType.uuid || null;
+        };
 
         var getPreviousDispositionNote = function () {
             if (consultation.disposition && (!consultation.disposition.voided)) {
@@ -80,6 +96,7 @@ angular.module('bahmni.clinical')
 
         $scope.clearDispositionNote = function () {
             $scope.dispositionNote.value = null;
+            console.log("chosen", $scope.dispositionCode);
         };
 
         var getSelectedConceptName = function (dispositionCode, dispositions) {
@@ -119,4 +136,27 @@ angular.module('bahmni.clinical')
 
         $scope.consultation.preSaveHandler.register("dispositionSaveHandlerKey", saveDispositions);
         $scope.$on('$destroy', saveDispositions);
+
+        $scope.selectClinic = function () {
+            console.log("chosen", $scope.dispositionCode);
+            console.log("clinic", $scope.specialClinicReferred);
+            console.log("full", $scope.specialClinicReferred);
+
+            if ($scope.specialClinicReferred && $scope.visitSummary.visitType !== $scope.defaultVisitTypeName) {
+                ngDialog.openConfirm({
+                    template: 'views/visitChangeConfirmation.html',
+                    scope: $scope,
+                    closeByEscape: true
+                });
+            }
+
+        };
+
+        var init = function(){
+            console.log("init function", $scope.consultation);
+            $scope.specialClinicReferred = $scope.specialClinicReferred || null;
+            getVisitTypes();
+
+        };
+        init();
     }]);

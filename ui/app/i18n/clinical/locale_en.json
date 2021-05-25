@@ -278,6 +278,8 @@
     "DISPOSITION_TYPE_LABEL": "Disposition Type",
     "DISPOSITION_NOTE_LABEL": "Disposition Notes",
     "DISPOSITION_NOTE_WILL_BE_REMOVED_WARNING_MESSAGE": "The Disposition Note will also be removed",
+    "DISPOSITION_REFER_SPECIAL_CLINIC": "Refer to Special Clinic",
+    "DISPOSITION_SELECT_CLINIC": "Select Clinic",
     "CLINICAL_ADD_NOTES": "Add Notes",
     "INVESTIGATION_NO_TEST_PRESENT_MESSAGE": "There are no tests. Please setup tests",
     "CONSULTATION_TREATMENTS_HEADER_LABEL": "Treatments",
