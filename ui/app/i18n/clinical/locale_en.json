@@ -335,6 +335,12 @@
     "PEER_REQUEST_NOTES": "Request Notes",
     "PATIENT_REVIEWS" : "My Patient Review Requests",
     "REVIEW_RESPONSE": "Review Response",
-    "TO_BE_REVIEWED_BY_ME": "To be Reviewed By Me"
+    "TO_BE_REVIEWED_BY_ME": "To be Reviewed By Me",
+    "VISIT_CHANGE_CONFIRMATION_OPTION_YES_KEY": "I understand",
+    "VISIT_CHANGE_CANCEL": "Cancel Referral",
+    "VISIT_CHANGE_CONFIRMATION_DIALOG_MESSAGE_KEY": "The current <b>{{ currentVisitType }} visit will be closed and a {{ visitType }} visit will be started after saving",
+    "MODULE_LABEL_CLINICAL_KEY": "Clinical",
+    "CLINICAL_REFER_TO_CLINIC_FAILED": "Referral to clinic failed",
+    "CLINICAL_REFER_TO_CLINIC_SUCCESS": "Referral to clinic successful"
 
 }
