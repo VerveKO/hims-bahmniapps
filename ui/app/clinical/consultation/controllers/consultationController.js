@@ -2,13 +2,13 @@
 
 angular.module('bahmni.clinical').controller('ConsultationController',
     ['$scope', '$rootScope', '$state', '$location', '$translate', 'clinicalAppConfigService', 'diagnosisService', 'urlHelper', 'contextChangeHandler',
-        'spinner', 'encounterService', 'messagingService', 'sessionService', 'retrospectiveEntryService', 'patientContext', '$q',
+        'spinner', 'visitService', 'encounterService', 'messagingService', 'sessionService', 'retrospectiveEntryService', 'patientContext', '$q',
         'patientVisitHistoryService', '$stateParams', '$window', 'visitHistory', 'clinicalDashboardConfig', 'appService',
         'ngDialog', '$filter', 'configurations', 'visitConfig', 'conditionsService', 'configurationService', 'auditLogService', 'peerReviewService',
         function ($scope, $rootScope, $state, $location, $translate, clinicalAppConfigService, diagnosisService, urlHelper, contextChangeHandler,
-                  spinner, encounterService, messagingService, sessionService, retrospectiveEntryService, patientContext, $q,
-                  patientVisitHistoryService, $stateParams, $window, visitHistory, clinicalDashboardConfig, appService,
-                  ngDialog, $filter, configurations, visitConfig, conditionsService, configurationService, auditLogService, peerReviewService) {
+            spinner, visitService, encounterService, messagingService, sessionService, retrospectiveEntryService, patientContext, $q,
+            patientVisitHistoryService, $stateParams, $window, visitHistory, clinicalDashboardConfig, appService,
+            ngDialog, $filter, configurations, visitConfig, conditionsService, configurationService, auditLogService, peerReviewService) {
             var DateUtil = Bahmni.Common.Util.DateUtil;
             var getPreviousActiveCondition = Bahmni.Common.Domain.Conditions.getPreviousActiveCondition;
             $scope.togglePrintList = false;
@@ -26,6 +26,7 @@ angular.module('bahmni.clinical').controller('ConsultationController',
             $scope.clinicalDashboardConfig = clinicalDashboardConfig;
             $scope.lastvisited = null;
             $scope.review = {};
+            $scope.referralClinicData = $scope.referralClinicData || {};
 
             $scope.openConsultationInNewTab = function () {
                 $window.open('#' + $scope.consultationBoardLink, '_blank');
@@ -173,7 +174,7 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                             event.preventDefault();
                             spinner.hide(toState.spinnerToken);
                             ngDialog.close();
-                            $scope.toStateConfig = {toState: toState, toParams: toParams};
+                            $scope.toStateConfig = { toState: toState, toParams: toParams };
                             $scope.displayConfirmationDialog();
                         }
                     }
@@ -198,7 +199,7 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                         event.preventDefault();
                         $scope.targetUrl = event.currentTarget.getAttribute('href');
                     }
-                    ngDialog.openConfirm({template: '../common/ui-helper/views/saveConfirmation.html', scope: $scope});
+                    ngDialog.openConfirm({ template: '../common/ui-helper/views/saveConfirmation.html', scope: $scope });
                 }
             };
 
@@ -379,6 +380,12 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                 }
             };
 
+            var referToInternalClinic = function () {
+                if ($scope.referralClinic) {
+
+                }
+            }
+
             var storeTemplatePreference = function (selectedObsTemplate) {
                 var templates = [];
                 _.each(selectedObsTemplate, function (template) {
@@ -470,12 +477,47 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                 $scope.dashboardDirty = true;
             };
 
+            var closeVisit = function (visitUuid, visitType, newVisitType, visitLocation) {
+                visitService.endVisit(visitUuid).then(function () {
+                    var messageParams = { visitUuid: visitUuid, visitType: visitType };
+                    auditLogService.log($scope.patient.uuid, 'CLOSE_VISIT', messageParams, 'MODULE_LABEL_CLINICAL_KEY');
+                }).then(function () {
+                    var visitDetails = {
+                        patient : $scope.patient.uuid,
+                        visitType: newVisitType,
+                        location: visitLocation
+                    }
+                    visitService.createVisit(visitDetails).then(function (response) {
+                        if (response.status == 201){
+                            messagingService.showMessage('info', "{{'CLINICAL_REFER_TO_CLINIC_SUCCESS' | translate}}");
+                        }else{
+                            messagingService.showMessage("error", 'CLINICAL_REFER_TO_CLINIC_FAILED'); 
+                        }
+                    });
+                    
+                });
+            };
+
+            var closeVisitIfDischarged = function (referralClinicData) {
+                if (referralClinicData) {
+                    var visitSummary = referralClinicData.visitSummary;
+                    if (visitSummary.admissionDetails && !visitSummary.dischargeDetails) {
+                        messagingService.showMessage("error", 'REGISTRATION_VISIT_CANNOT_BE_CLOSED');
+                        var messageParams = { visitUuid: visitUuid, visitType: visitSummary.visitType };
+                        auditLogService.log($scope.patient.uuid, 'CLOSE_VISIT_FAILED', messageParams, 'MODULE_LABEL_CLINICAL_KEY');
+                    } else {
+                        closeVisit(visitSummary.uuid, visitSummary.visitType, referralClinicData.referralClinic, referralClinicData.visitLocation);
+                    }
+                }
+            };
+
             $scope.save = function (toStateConfig) {
                 if (!isFormValid()) {
                     $scope.$parent.$parent.$broadcast("event:errorsOnForm");
                     return $q.when({});
                 }
                 $scope.review = $scope.consultation.review;
+                $scope.referralClinicData = $scope.consultation.referralClinicData;
                 $scope.updatedResponses = $scope.consultation.reviewedResponses;
                 return spinner.forPromise($q.all([preSavePromise(), encounterService.getEncounterType($state.params.programUuid, sessionService.getLoginLocationUuid(), saveRequestReview(), updateReviewResponse())]).then(function (results) {
                     var encounterData = results[0];
@@ -514,6 +556,9 @@ angular.module('bahmni.clinical').controller('ConsultationController',
                                         });
                                     });
                                 }));
+                        }).then(function () {
+                            // For referral clinic- close current an start new visit here
+                            closeVisitIfDischarged($scope.referralClinicData);
                         }).catch(function (error) {
                             var message = Bahmni.Clinical.Error.translate(error) || "{{'CLINICAL_SAVE_FAILURE_MESSAGE_KEY' | translate}}";
                             messagingService.showMessage('error', message);
