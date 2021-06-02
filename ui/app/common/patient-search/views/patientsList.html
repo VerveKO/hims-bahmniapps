@@ -41,7 +41,7 @@
                 </div>
             </form>
         </span>
-        <resize ng-if="search.isTabularView()" search-results="search.searchResults"
+        <resize ng-if="search.isTabularView() && search.searchType.name != 'Radiology Order'" search-results="search.searchResults"
                 visible-results="search.visiblePatients" class="active-visits">
             <div class="ward-details-container">
                 <table class="table patient-list-table">
@@ -71,8 +71,50 @@
                 </table>
             </div>
         </resize>
-        <resize ng-if="search.isTileView()" search-results="search.searchResults"
+
+        <resize ng-if="search.isTabularView() && search.searchType.name == 'Radiology Order'" search-results="search.searchResults"
                 visible-results="search.visiblePatients" class="active-visits">
+            <div class="ward-details-container">
+                <table class="table patient-list-table">
+                    <thead>
+                    <tr>
+                        <!-- <th><strong>Sl.No</strong></th> -->
+                        <th ng-repeat="heading in getHeadings(search.visiblePatients)" ng-if="heading !== 'paymentStatus'"><strong>{{ ::heading | translate }}</strong></th>
+                        <th>Payment Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in search.visiblePatients">
+                        <!-- <td>
+                            {{$index + 1}}
+                        </td> -->
+                        <td ng-repeat="heading in getHeadings(search.visiblePatients)" ng-if="heading !== 'paymentStatus'">
+                            <a ng-if="::isHeadingOfLinkColumn(heading)"
+                               ng-click="forwardPatient(row, heading)">{{::row[heading]}}</a>
+                            <span ng-if="::isHeadingOfName(heading)" ng-click="forwardPatient(row)">{{::row[heading]}}
+                                 <i class="ipd-indication fa fa-bed" ng-if="::(row.hasBeenAdmitted===true||row.hasBeenAdmitted==='true')"></i>
+                             </span>
+
+                        </td>
+                        <td>{{::row.paymentStatus}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </resize>
+        <resize ng-if="search.isTileView() && search.searchType.name != 'Radiology Order'" search-results="search.searchResults"
+                visible-results="search.visiblePatients" class="active-visits">
+            <ul>
+                <li ng-repeat="patient in search.visiblePatients" class="active-patient" ng-click="forwardPatient(patient)">
+                    <img class="smallImages" ng-src="{{::patient.image}}" fallback-src='../images/blank-user.png'>
+                    <div class="patient-name">{{::patient.name}}</div>
+                    <div class="patient-id">{{::patient.identifier}}</div>
+                    <i class="ipd-indication fa fa-bed" ng-if="::(patient.hasBeenAdmitted===true||patient.hasBeenAdmitted==='true')"></i>
+                </li>
+            </ul>
+        </resize>
+        <resize ng-if="search.isTileView() && search.searchType.name == 'Radiology Order'" search-results="search.searchResults"
+                visible-results="search.visiblePatients" class="asearch.visiblePatientsctive-visits">
             <ul>
                 <li ng-repeat="patient in search.visiblePatients" class="active-patient" ng-click="forwardPatient(patient)">
                     <img class="smallImages" ng-src="{{::patient.image}}" fallback-src='../images/blank-user.png'>
