@@ -4,8 +4,13 @@
         <div ng-if="!isDataPresent()">
             <div class="placeholder-text">{{::'NO_ADMISSION_DETAILS_MESSAGE' | translate}}</div>
         </div>
-        <table class="dashboard-table history-diagnosis" ng-if="::visitSummary.admissionDetails || visitSummary.dischargeDetails">
+        <table class="dashboard-table history-diagnosis"
+               ng-if="::visitSummary.admissionDetails || visitSummary.dischargeDetails || adtType">
             <tbody class="row">
+            <tr ng-if="::adtType">
+                <td class="value">Admission Type</td>
+                <td class="value">{{::adtType}}</td>
+            </tr>
             <tr ng-if="bedDetails">
                 <td class="value">{{::bedDetails.wardName}}</td>
                 <td class="value">{{::bedDetails.bedNumber}}</td>

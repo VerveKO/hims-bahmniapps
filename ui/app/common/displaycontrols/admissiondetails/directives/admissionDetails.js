@@ -1,7 +1,8 @@
 "use strict";
 
 angular.module('bahmni.common.displaycontrol.admissiondetails')
-    .directive('admissionDetails', ['bedService', function (bedService) {
+    .directive('admissionDetails', ['bedService', 'observationsService', 'spinner',
+        function (bedService, observationsService, spinner) {
         var controller = function ($scope) {
             $scope.showDetailsButton = function (encounter) {
                 return $scope.params && $scope.params.showDetailsButton && !encounter.notes;
@@ -20,6 +21,16 @@ angular.module('bahmni.common.displaycontrol.admissiondetails')
                 $scope.bedDetails = bedDetails;
             });
         };
+
+            var getAdmissionType = function ($scope) {
+                const conceptNames = ["ADT TYPE"];
+                spinner.forPromise(observationsService.fetch($scope.patientUuid, conceptNames, "1", undefined, $scope.visitSummary.uuid, undefined).then(function (response) {
+                    if (response.data[0].value) {
+                        $scope.adtType = response.data[0].value.name;
+                    }
+                }));
+            };
+
         var init = function ($scope) {
             var stopWatching = $scope.$watchGroup(['patientUuid', 'visitSummary'], function () {
                 if (isReady($scope)) {
