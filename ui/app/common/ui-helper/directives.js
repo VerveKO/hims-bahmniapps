@@ -151,7 +151,6 @@ angular.module('bahmni.common.uiHelper')
                 var capitalize = function (inputValue) {
                     if (inputValue === undefined || inputValue === null) {
                         inputValue = '';
-                        console.log("returning");
                         return;
                     }
                     var capitalized = inputValue.charAt(0).toUpperCase() +
