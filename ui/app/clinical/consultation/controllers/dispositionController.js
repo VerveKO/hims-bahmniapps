@@ -1,17 +1,16 @@
 'use strict';
 
 angular.module('bahmni.clinical')
-    .controller('DispositionController', ['$rootScope', '$scope', '$q', 'dispositionService', 'retrospectiveEntryService', 'visitService', 'spinner', function ($rootScope, $scope, $q, dispositionService, retrospectiveEntryService, visitService, spinner) {
+    .controller('DispositionController', ['$rootScope', '$scope', '$q', 'dispositionService', 'retrospectiveEntryService', 'visitService',
+        '$bahmniCookieStore', 'locationService', 'ngDialog', 'spinner', function ($rootScope, $scope, $q, dispositionService, retrospectiveEntryService, visitService, $bahmniCookieStore, locationService, ngDialog, spinner) {
         var consultation = $scope.consultation;
         var allDispositions = [];
 
-        $scope.referClinicDisposition = "REFER_SPECIAL_CLINIC (Refer to special clinic)";
+        $scope.referClinicDisposition = "BOOK_TO_CLINIC";
 
         var getVisitTypes = function () {
             return visitService.getVisitType().then(function (response) {
-                console.log("response", response);
                 $scope.visitTypes = response.data.results;
-                console.log("Visist types", $scope.visitTypes);
 
             });
         };
@@ -133,17 +132,47 @@ angular.module('bahmni.clinical')
             }
         };
 
+            var mapVisitUuidToVisit = function(visitTypeUuid) {
+                var selectedVisit = _.filter($scope.visitTypes, function (visitType) {
+                    return visitType.uuid === visitTypeUuid;
+                });
+                return selectedVisit[0];
+            };
+
+            var getVisitLocation = function () {
+                var loginLocationUuid = $bahmniCookieStore.get(Bahmni.Common.Constants.locationCookieName).uuid;
+                return locationService.getVisitLocation(loginLocationUuid).then(function (response) {
+                    if (response.data) {
+                        $scope.consultation.referralClinicData.visitLocation = response.data.uuid;
+                    }
+                });
+            }
+
+            $scope.closeCurrentVisitAndStartNew = function () {
+                $scope.consultation.referralClinicData = {};
+                $scope.consultation.referralClinicData.referralClinic = $scope.specialClinicReferred;
+                $scope.consultation.referralClinicData.visitSummary = $scope.visitSummary;
+                $scope.consultation.referralClinicData.referralClinicVisitType = $scope.referralClinicVisitType;
+                getVisitLocation();
+                ngDialog.close();
+            };
+
+            $scope.cancelClinicReferral = function() {
+                $scope.dispositionNote.value = null;
+                $scope.dispositionCode = "";
+                $scope.specialClinicReferred = null;
+                $scope.referralClinicVisitType = null;
+                ngDialog.close();
+            };
+
         $scope.consultation.preSaveHandler.register("dispositionSaveHandlerKey", saveDispositions);
         $scope.$on('$destroy', saveDispositions);
 
         $scope.selectClinic = function () {
-            console.log("chosen", $scope.dispositionCode);
-            console.log("clinic", $scope.specialClinicReferred);
-            console.log("full", $scope.specialClinicReferred);
 
             if ($scope.specialClinicReferred && $scope.visitSummary.visitType !== $scope.defaultVisitTypeName) {
                 ngDialog.openConfirm({
-                    template: 'views/visitChangeConfirmation.html',
+                    template: 'consultation/views/visitChangeConfirmation.html',
                     scope: $scope,
                     closeByEscape: true
                 });
@@ -152,7 +181,6 @@ angular.module('bahmni.clinical')
         };
 
         var init = function(){
-            console.log("init function", $scope.consultation);
             $scope.specialClinicReferred = $scope.specialClinicReferred || null;
             getVisitTypes();
 
