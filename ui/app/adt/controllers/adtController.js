@@ -204,9 +204,7 @@ angular.module('bahmni.adt')
                                 $scope.visitSummary = new Bahmni.Common.VisitSummary(response.data);
                             });
                         }
-                        forwardUrl(response, "onAdmissionForwardTo");
-                    }).then(function () {
-                        console.log("visit summary", $scope.visitSummary);
+
                         var params = {
                             "visit_type": $scope.visitSummary.visitType,
                             "visit_uuid": $scope.visitSummary.uuid,
@@ -214,11 +212,8 @@ angular.module('bahmni.adt')
                             "patient_name": $scope.patient.name,
                             "patient_id": $scope.patient.identifier
                         };
-
-                        if ($scope.patient.modeOfPayment) {
-                            params.mode_of_payment = $scope.patient.modeOfPayment.value.display;
-                        }
-                        patientService.admitPatientInErp(params);
+                        admitErp(params);
+                        forwardUrl(response, "onAdmissionForwardTo");
                     });
                 } else if ($scope.defaultVisitTypeName === null) {
                     messagingService.showMessage("error", "MESSAGE_DEFAULT_VISIT_TYPE_NOT_FOUND_KEY");
@@ -255,6 +250,14 @@ angular.module('bahmni.adt')
                 return auditLogService.log(patientUuid, 'EDIT_ENCOUNTER', messageParams, 'MODULE_LABEL_INPATIENT_KEY');
             };
 
+            var admitErp = function (params) {
+                console.log("regestiring in erp ", params);
+                if ($scope.patient.modeOfPayment) {
+                    params.mode_of_payment = $scope.patient.modeOfPayment.value.display;
+                }
+                patientService.admitPatientInErp(params);
+            };
+
             $scope.closeCurrentVisitAndStartNewVisit = function () {
                 if (defaultVisitTypeUuid !== null) {
                     var encounter = getEncounterData($scope.encounterConfig.getAdmissionEncounterTypeUuid(), defaultVisitTypeUuid);
@@ -267,9 +270,6 @@ angular.module('bahmni.adt')
                                 return logEncounter(response.patientUuid, response.encounterUuid, response.encounterType);
                             });
                         }).then(function () {
-                            forwardUrl(response, "onAdmissionForwardTo");
-                        }).then(function () {
-                            console.log("visit summary", $scope.visitSummary);
                             var params = {
                                 "visit_type": $scope.visitSummary.visitType,
                                 "visit_uuid": $scope.visitSummary.uuid,
@@ -277,11 +277,8 @@ angular.module('bahmni.adt')
                                 "patient_name": $scope.patient.name,
                                 "patient_id": $scope.patient.identifier
                             };
-
-                            if ($scope.patient.modeOfPayment) {
-                                params.mode_of_payment = $scope.patient.modeOfPayment.value.display;
-                            }
-                            patientService.admitPatientInErp(params);
+                            admitErp(params);
+                            forwardUrl(response, "onAdmissionForwardTo");
                         });
                     });
                 } else if ($scope.defaultVisitTypeName === null) {
