@@ -171,11 +171,17 @@ angular.module('bahmni.common.patientSearch')
             }
         };
 
-        $scope.forwardPatient = function (patient, heading) {
-            if($scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType) {
+        $scope.forwardRadiologyPatient = function (patient, heading, paymentStatus) {
+            if ($scope.search.searchType.name === Bahmni.Common.Constants.radiologyOrderSerachType && paymentStatus === "Unpaid") {
                 messagingService.showMessage("error", "Order is not paid for. Please advise " + patient.name + " to pay first.");
                 return;
+            } else {
+                $scope.forwardPatient(patient, heading);
             }
+        };
+
+        $scope.forwardPatient = function (patient, heading) {
+            console.log("radiology");
             var options = $.extend({}, $stateParams);
             $rootScope.patientAdmitLocationStatus = patient.Status;
             $.extend(options, {
