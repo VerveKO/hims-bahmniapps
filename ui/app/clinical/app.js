@@ -185,6 +185,18 @@ angular.module('consultation')
                     }
                 }
             })
+            .state('patient.dashboard.show.peerReview', {
+                url: '/peerreview',
+                params: {
+                    cachebuster: null
+                },
+                views: {
+                    'consultation-content': {
+                        templateUrl: 'consultation/views/peerReview.html',
+                        controller: 'PeerReviewController'
+                    }
+                }
+            })
             .state('patient.dashboard.show.treatment', {
                 abstract: true,
                 params: {

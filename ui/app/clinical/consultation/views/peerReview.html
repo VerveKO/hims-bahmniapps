@@ -1,0 +1,72 @@
+<div class="disposition-wrapper">
+    <div class="infoMsgRetrospectiveModeEnabled" ng-if="isRetrospectiveMode()">
+        <i class="fa fa-info-circle"></i>
+        <span ng-bind-html="'PEER_REVIEW_NOT_ALLOWED_IN_RETROSPECTIVE_MESSAGE'|translate"></span>
+    </div>
+    <div class="box disposition-tab" style="margin-bottom: 25px">
+        <form ng-submit="submit()">
+            <label for="name">{{ 'DOCTOR_LABEL'|translate }}: </label>
+            <input ng-model="selectedProvider" type="text" name="name" id="name"
+                   bahmni-autocomplete source="getProviders"
+                   response-map="responseMap"
+                   on-select="selectProvider"
+                   ng-change="consultation.condition.clearConcept()"
+            >
+            <div class="dispositionNotesWrap">
+                <label class="disposition-notes" for="requestNotes">{{ 'PEER_REQUEST_NOTES'|translate }}: </label>
+                <textarea id="requestNotes" ng-model="review.notes" ng-disabled="isRetrospectiveMode()"
+                          placeholder="Notes..."
+                          ng-blur="checkReview()"
+                          msd-elastic></textarea>
+            </div>
+        </form>
+    </div>
+
+    <section class="block treatment-section section-grid" style="margin-bottom: 25px">
+        <h2 class="section-title">{{ 'PATIENT_REVIEWS'|translate }}</h2>
+        <div ng-show="consultation.patientReviews.length > 0" ng-repeat="patientReview in consultation.patientReviews"
+             class="section-grid" style="padding: 10px;">
+            <p style="margin-bottom: 5px">Request Notes : {{::patientReview.notes}}</p>
+            <p>Date : {{::patientReview.dateCreated | bahmniDateTime}}</p>
+            <table style="margin-bottom: 20px;margin-top: 20px;">
+                <thead>
+                <tr class="title">
+                    <th><span class="table-head-title">{{ 'DOCTOR_LABEL'|translate }}</span></th>
+                    <th colspan="3"><span
+                            class="table-head-title">{{ 'REVIEW_RESPONSE'|translate }}</span></th>
+                </tr>
+                </thead>
+                <tr ng-if="patientReview.responses" ng-repeat="reviewResponse in patientReview.responses">
+                    <td>{{::reviewResponse.provider.name}}</td>
+                    <td colspan="3" ng-if="reviewResponse.comments">{{::reviewResponse.comments}}</td>
+                    <td colspan="3" ng-if="!reviewResponse.comments">Awaiting review...</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="block treatment-section section-grid">
+        <h2 class="section-title">{{ 'TO_BE_REVIEWED_BY_ME'|translate }}</h2>
+        <div ng-show="consultation.myResponses.length > 0" ng-repeat="myResponse in consultation.myResponses track by $index"
+             class="section-grid" style="padding: 10px;">
+            <p style="margin-bottom: 5px">Request By : {{::myResponse.reviewRequest.providerName}}</p>
+            <p style="margin-bottom: 5px">Request Notes : {{::myResponse.reviewRequest.notes}}</p>
+            <p>Request Date : {{::myResponse.reviewRequest.dateCreated | bahmniDateTime}}</p>
+
+            <div class="disposition-wrapper" style="margin-top: 10px">
+                <div class="box disposition-tab" >
+                    <form ng-submit="submit()">
+                        <div class="dispositionNotesWrap">
+                            <label class="disposition-notes" for="rs{{$index}}">{{ 'My Review'|translate
+                                }}: </label>
+                            <textarea id="rs{{$index}}" ng-model="consultation.reviewedResponses[myResponse.uuid].comment" ng-disabled="isRetrospectiveMode()"
+                                      placeholder="Review..."
+                                      msd-elastic></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>

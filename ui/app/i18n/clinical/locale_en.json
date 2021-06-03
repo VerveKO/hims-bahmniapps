@@ -327,5 +327,11 @@
     "INVESTIGATIONS_PANELS_HEADER_LABEL": "Panels",
     "INVESTIGATIONS_SELECTIONS_HEADER_LABEL": "Selection",
     "CLINICAL_GO_TO_DASHBOARD_LABEL": "Go to IPD dashboard",
-    "CONSULTATION_PAD_EMPTY_MESSAGE": ""
+    "CONSULTATION_PAD_EMPTY_MESSAGE": "",
+    "PEER_REVIEW_NOT_ALLOWED_IN_RETROSPECTIVE_MESSAGE": "<strong>Peer Review</strong> entry is <strong>NOT allowed</strong> in retrospective mode",
+    "DOCTOR_LABEL": "Doctor",
+    "PEER_REQUEST_NOTES": "Request Notes",
+    "PATIENT_REVIEWS" : "My Patient Review Requests",
+    "REVIEW_RESPONSE": "Review Response",
+    "TO_BE_REVIEWED_BY_ME": "To be Reviewed By Me"
 }
