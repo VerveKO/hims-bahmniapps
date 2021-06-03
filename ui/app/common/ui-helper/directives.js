@@ -143,4 +143,27 @@ angular.module('bahmni.common.uiHelper')
             link: link,
             require: 'ngModel'
         };
-    });
+    })
+    .directive('capitalizeFirst', ['$parse', function ($parse) {
+        return {
+            require: 'ngModel',
+            link: function (scope, element, attrs, modelCtrl) {
+                var capitalize = function (inputValue) {
+                    if (inputValue === undefined || inputValue === null) {
+                        inputValue = '';
+                        console.log("returning");
+                        return;
+                    }
+                    var capitalized = inputValue.charAt(0).toUpperCase() +
+                        inputValue.substring(1);
+                    if (capitalized !== inputValue) {
+                        modelCtrl.$setViewValue(capitalized);
+                        modelCtrl.$render();
+                    }
+                    return capitalized;
+                };
+                modelCtrl.$parsers.push(capitalize);
+                capitalize($parse(attrs.ngModel)(scope));
+            }
+        };
+    }]);
