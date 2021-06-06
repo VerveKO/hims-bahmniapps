@@ -17,6 +17,7 @@ angular.module('bahmni.common.patientSearch')
             $scope.$watch('search.activePatients', function (activePatientsList) {
                 if (activePatientsList.length > 0 && patientListSpinner) {
                     hideSpinner(spinner, patientListSpinner, $(".tab-content"));
+                    fetchPaymentStatus();
                 }
             });
             if (patientSearchConfig && patientSearchConfig.serializeSearch) {
@@ -183,7 +184,6 @@ angular.module('bahmni.common.patientSearch')
         };
 
         $scope.forwardPatient = function (patient, heading) {
-            console.log("radiology");
             var options = $.extend({}, $stateParams);
             $rootScope.patientAdmitLocationStatus = patient.Status;
             $.extend(options, {

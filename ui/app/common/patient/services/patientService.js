@@ -30,6 +30,7 @@ angular.module('bahmni.common.patient')
         this.getRadiologyPayment = function (identifier) {
             var params = {};
             params.patient_id = identifier;
+            console.log("Getting for", params);
             return $http.post(Bahmni.Common.Constants.radiology_middleware, params, {withCredentials: true});
         };
 
