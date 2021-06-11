@@ -13,8 +13,8 @@ Bahmni.Common = Bahmni.Common || {};
     var BACTERIOLOGY = RESTWS_V1;
     var BASE_URL = hostUrl + "/bahmni_config/openmrs/apps/";
     var CUSTOM_URL = hostUrl + "/implementation_config/openmrs/apps/";
-    var MIDDLEWARE = "https://middleware.ieshealth.net:8443/middlewareapi/test";
-    var PROD_MIDDLEWARE = "https://middleware.ieshealth.net:9443/middlewareapi/prod";
+    var MIDDLEWARE = "https://middleware.ieshealth.net:9443/middlewareapi/dev";
+    var PROD_MIDDLEWARE = "https://middleware.ieshealth.net:7443/middlewareapi/prod";
 
     var serverErrorMessages = [
         {
